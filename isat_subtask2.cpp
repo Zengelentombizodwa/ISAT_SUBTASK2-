@@ -6,32 +6,34 @@
 using namespace std;
 
 // Converts a non-negative decimal number to a 16-bit binary string
-string decimalToBinary(int decimal) {
-    if (decimal < 0 || decimal > 65535) {
+string decimalToBinary(unsigned int decimal) {
+    if (decimal > 65535u) {
         cout << "Error: Please enter a number between 0 and 65535.\n";
         return "";
     }
     return bitset<16>(decimal).to_string();
 }
 
-// Converts a binary string to its decimal equivalent
+// Converts a binary string to its decimal equivalent (0..65535)
 int binaryToDecimal(const string& binary) {
-    if (binary.length() > 16) {
+    if (binary.empty()) {
+        cout << "Error: Empty input.\n";
+        return -1;
+    }
+    if (binary.length() > 16u) {
         cout << "Error: Binary input exceeds 16 bits.\n";
         return -1;
     }
 
-    int decimal = 0;
-    for (size_t i = 0; i < binary.length(); ++i) {
-        char digit = binary[i];
-        if (digit == '1') {
-            decimal += 1 << (binary.length() - 1 - i);
-        } else if (digit != '0') {
-            cout << "Error: Invalid binary digit '" << digit << "'.\n";
+    unsigned int value = 0;
+    for (char c : binary) {
+        if (c != '0' && c != '1') {
+            cout << "Error: Invalid binary digit '" << c << "'.\n";
             return -1;
         }
+        value = (value << 1) + (c - '0'); // shift left and add current bit
     }
-    return decimal;
+    return static_cast<int>(value);
 }
 
 // Clears the input buffer after invalid input
@@ -40,7 +42,6 @@ void clearInput() {
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 }
 
-// Displays the main menu and handles user interaction
 int main() {
     int choice;
 
@@ -59,8 +60,8 @@ int main() {
 
         switch (choice) {
             case 1: {
-                int decimal;
-                cout << "Enter a decimal number (0–65535): ";
+                unsigned int decimal;
+                cout << "Enter a decimal number (0-65535): ";
                 if (!(cin >> decimal)) {
                     cout << "Invalid input. Please enter a valid integer.\n";
                     clearInput();
@@ -68,7 +69,7 @@ int main() {
                 }
                 string binary = decimalToBinary(decimal);
                 if (!binary.empty()) {
-                    cout << "Binary representation: " << binary << "\n";
+                    cout << "Binary representation (16-bit): " << binary << "\n";
                 }
                 break;
             }
